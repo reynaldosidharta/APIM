@@ -1,0 +1,1010 @@
+<entityStoreData xmlns="http://www.vordel.com/2005/06/24/entityStore">
+<metaInfo flags="138">
+	<exportRoots>
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+			</key>
+		</key>
+		<key type='ESConfiguration'>
+			<id field='name' value='Entity Store Configuration'/>
+		</key>
+	</exportRoots>
+	<typeVersions>
+		<type name="AlertFilter" version="4"/>
+		<type name="AlertNotification" version="1"/>
+		<type name="AttributeCompare" version="1"/>
+		<type name="AttributeExtractHTTPHeaderFilter" version="0"/>
+		<type name="CircuitContainer" version="1"/>
+		<type name="CommsFailureRequirement" version="1"/>
+		<type name="CompareAttributeFilter" version="0"/>
+		<type name="ESConfiguration" version="30"/>
+		<type name="EmailAlertNotification" version="1"/>
+		<type name="Entity" version="0"/>
+		<type name="FalseFilter" version="0"/>
+		<type name="Filter" version="5"/>
+		<type name="FilterCircuit" version="4"/>
+		<type name="JSONPath" version="1"/>
+		<type name="JSONPathFilter" version="0"/>
+		<type name="JSONRemoveNodeFilter" version="2"/>
+		<type name="JavaScriptFilter" version="3"/>
+		<type name="RootChild" version="0"/>
+		<type name="SLAFilter" version="2"/>
+		<type name="SLARequirement" version="0"/>
+		<type name="SetAttributeFilter" version="0"/>
+		<type name="TrueFilter" version="0"/>
+	</typeVersions>
+	<realizedTypes><![CDATA[
+<entityStoreData>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Entity" name="RootChild"/>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="ESConfiguration">
+        <constant name="_version" type="integer" value="30"/>
+        <!--
+            Give this singleton a key.
+        -->
+        <field isKey="true" name="name" type="string"/>
+        <!-- 
+            We use this field to verify that the passphrase for the 
+            encryped data is synchronized between the server and client, and
+            between multiple invocations of the client
+        -->
+        <field name="passphraseTest" type="encrypted"/>
+        <field name="version" type="string"/>
+        <!-- The product key should never change for the lifetime of the product -->
+        <field name="productKey" type="string"/>
+        <field cardinality="?" name="gitrev" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="CircuitContainer">
+    <constant name="_version" type="integer" value="1"/>
+    <componentType cardinality="*" name="FilterCircuit"/>
+    <componentType cardinality="*" name="CircuitContainer"/>
+    <componentType cardinality="*" name="MVProperty"/>
+    <field isKey="true" name="name" type="string"/>
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="FilterCircuit">
+        <constant name="_version" type="integer" value="4"/>
+		<componentType cardinality="*" name="Filter"/>
+		<componentType cardinality="1" name="BoundCircuit"/>
+		<componentType cardinality="*" name="Property"/>
+		<field cardinality="1" name="start" type="@Filter"/>
+		<field cardinality="?" name="fault" type="@Filter"/>
+		<field isKey="true" name="name" type="string"/>
+		<field cardinality="1" default="3" name="logMask" type="integer"/>
+
+		<field cardinality="?" name="description" type="string"/>		
+		<field cardinality="1" name="category" type="@PolicyCategory">
+            <defaultRef>
+                <key type="PolicyCategoryGroup">
+                  <id field="name" value="Policy Categories"/>
+                  <key type="PolicyCategory">
+                      <id field="name" value="miscellaneous"/>
+                  </key>
+                </key>
+            </defaultRef>
+        </field>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="false" extends="Entity" name="AttributeCompare">
+      <constant name="_version" type="integer" value="1"/>
+      <field isKey="true" name="attrName" type="string"/>
+      <field default="CONTAINS" isKey="true" name="matchType" type="string"/>
+      <field isKey="true" name="expression" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="false" extends="Entity" name="JSONPath">
+        <constant name="_version" type="integer" value="1"/>
+        <field name="attributeName" type="string"/>
+        <field isKey="true" name="expression" type="string"/>
+        <field default="java.util.List" name="unmarshalType" type="string"/>
+        <field default="false" name="failOnError" type="boolean"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Entity" name="SLARequirement">
+        <constant name="_version" type="integer" value="0"/>
+        <field cardinality="1" isKey="true" name="percentage" type="integer"/>
+        <field cardinality="1" default="1" isKey="true" name="thresholdType" type="integer"/>
+        <field cardinality="1" name="breachAlertMessage" type="string"/>
+        <field cardinality="1" name="clearAlertMessage" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="SLARequirement" name="CommsFailureRequirement">
+      <constant name="_version" type="integer" value="1"/>
+      <field cardinality="1" default="2" name="thresholdType" type="integer"/>      
+      <field cardinality="1" default=" Raising a Comms Failure SLA Alert. Alert details are as follows:- SLA Name: ${sla.name}. Requirement: No more than ${sla.threshold}% of requests may result in a comms failure. Percentage: ${sla.value}%. Time: ${sla.time}." name="breachAlertMessage" type="string"/>
+      <field cardinality="1" default=" Clearing a Comms Failure SLA Alert. Alert details are as follows:- SLA Name: ${sla.name}. Requirement: No more than ${sla.threshold}% of requests may result in a comms failure. Current Percentage: ${sla.value}%. Clearance Time: ${sla.time}." name="clearAlertMessage" type="string"/>     
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Entity" name="AlertNotification">
+        <constant name="_version" type="integer" value="1"/>
+		<field cardinality="1" isKey="true" name="alertSystem" type="^AlertSystem"/>
+		<field cardinality="1" default="" name="customMessage" type="string"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="AlertNotification" name="EmailAlertNotification">
+        <constant name="_version" type="integer" value="1"/>
+		<field cardinality="1" default="-1" name="mimeType" type="^MimeType"/>
+		<field cardinality="1" default="" name="messageTemplateFile" type="string"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Entity" name="Filter">
+        <constant name="_version" type="integer" value="5"/>
+        <field cardinality="?" name="successNode" type="@Filter"/>
+        <field cardinality="?" name="failureNode" type="@Filter"/>
+        <field isKey="true" name="name" type="string"/>
+        <field cardinality="1" default="2" name="logMask" type="integer"/>
+        <field cardinality="1" default="Filter aborted due to exception" name="logFatal" type="string"/>
+        <field cardinality="1" default="Filter failed" name="logFailure" type="string"/>
+        <field cardinality="1" default="Filter passed" name="logSuccess" type="string"/>
+        <field cardinality="1" name="category" type="@Category">
+            <defaultRef>
+                <key type="CategoryGroup">
+                  <id field="name" value="Filter Categories"/>
+                  <key type="Category">
+                      <id field="name" value="miscellaneous"/>
+                  </key>
+                </key>
+            </defaultRef>
+        </field>
+      <field cardinality="1" default="0" name="abortProcessingOnLogError" type="boolean"/>
+      <field cardinality="1" default="SERVICE" name="logMaskType" type="string"/>
+      <field cardinality="*" name="classloader" type="^ClassLoader"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="SetAttributeFilter">
+        <constant name="_version" type="integer" value="0"/>
+  
+    <!-- Name of the Filter class that encapsulates this configuration entity -->
+    <constant name="class" type="string" value="com.vordel.circuit.attribute.SetAttributeFilter"/>
+    
+    <!-- List of the configuration parameters, their types, and their default values -->
+    <field cardinality="1" default="" name="messageAttribute" type="string"/>	
+    <field cardinality="1" default="" name="attributeValue" type="string"/>	
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="SLAFilter">
+      <constant name="_version" type="integer" value="2"/>
+      <constant name="class" type="string" value="com.vordel.circuit.sla.SLAFilter"/>
+      <componentType cardinality="*" name="SLARequirement"/>
+      <field cardinality="+" name="alertSystem" type="^AlertSystem"/> 
+      <field cardinality="1" name="sampleSize" type="integer"/> 
+      <field cardinality="1" default="600000" name="dataAge" type="integer"/>  <!-- Keep data for 10 minutes -->
+      <field cardinality="1" default="30000" name="pollRate" type="integer"/>  <!-- Fold samples every 30 seconds. -->
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="JSONRemoveNodeFilter">
+        <constant name="_version" type="integer" value="2"/>
+        <constant name="class" type="string" value="com.vordel.circuit.json.JSONRemoveNodeFilter"/>
+        <field cardinality="*" name="node" type="string"/>
+        <field cardinality="1" name="failOnError" type="boolean"/>
+        <field cardinality="1" name="savedDeletedNodes" type="boolean"/> 
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="TrueFilter">
+        <constant name="_version" type="integer" value="0"/>
+		<constant name="class" type="string" value="com.vordel.circuit.basic.True"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="AttributeExtractHTTPHeaderFilter">
+        <constant name="_version" type="integer" value="0"/>
+    <constant name="class" type="string" value="com.vordel.circuit.attribute.AttributeExtractHTTPHeaderFilter"/>
+    <field cardinality="1" name="headerName" type="string"/>
+    <field cardinality="1" name="attributeName" type="string"/>
+    <field cardinality="1" default="0" name="base64Decode" type="boolean"/>
+    <field cardinality="1" default="0" name="useQueryParameter" type="boolean"/>
+    <!-- Override the category to give it a different default -->
+    <field cardinality="1" name="category" type="@Category">
+      <defaultRef>
+        <key type="CategoryGroup">
+          <id field="name" value="Filter Categories"/>
+          <key type="Category">
+            <id field="name" value="attribute"/>
+          </key>
+        </key>
+      </defaultRef>
+    </field>    
+  </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="JavaScriptFilter">
+        <constant name="_version" type="integer" value="3"/>
+	<constant name="class" type="string" value="com.vordel.circuit.script.ScriptFilter"/>
+	<field cardinality="1" default="function invoke(msg)         {            return true;         }" name="script" type="string"/>
+	<field cardinality="1" default="nashorn" name="engineName" type="string"/>
+        <field cardinality="*" name="requiredProperties" type="string"/>
+        <field cardinality="*" name="generatedProperties" type="string"/>
+        <field cardinality="*" name="consumedProperties" type="string"/>
+	</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="CompareAttributeFilter">
+        <constant name="_version" type="integer" value="0"/>
+        <constant name="class" type="string" value="com.vordel.circuit.attribute.CompareAttributeFilter"/>
+        <componentType name="AttributeCompare"/>
+        <field default="MATCH_ALL" name="matchingRule" type="string"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="AlertFilter">
+  <constant name="_version" type="integer" value="4"/>
+  <constant name="class" type="string" value="com.vordel.circuit.alert.AlertFilter"/>
+  
+  <componentType cardinality="+" name="AlertNotification"/>
+  
+  <field cardinality="?" name="alertMessage" type="string"/>
+  <field cardinality="1" default="1" name="alertType" type="integer"/>
+  <field cardinality="1" default="1" name="numberMessages" type="integer"/>             
+  <field cardinality="1" default="60000" name="timePeriodMillis" type="integer"/>           
+  <field cardinality="1" default="1" name="trackPerClient" type="boolean"/>
+  <field cardinality="1" name="alertPolicy" type="^FilterCircuit"/>
+</entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="JSONPathFilter">
+        <constant name="_version" type="integer" value="0"/>
+        <constant name="class" type="string" value="com.vordel.circuit.json.JSONPathFilter"/>
+        <componentType name="JSONPath"/>
+    </entityType>
+<entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="FalseFilter">
+        <constant name="_version" type="integer" value="0"/>
+		<constant name="class" type="string" value="com.vordel.circuit.basic.False"/>
+	</entityType>
+</entityStoreData>
+	]]></realizedTypes>
+</metaInfo>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+	</key>
+	<fval name="name"><value>Utility</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+		</key>
+	</key>
+	<fval name="name"><value>v1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+			</key>
+		</key>
+	</key>
+	<fval name="category"><value contentType="reference">
+		<key type='PolicyCategoryGroup'>
+			<id field='name' value='Policy Categories'/>
+			<key type='PolicyCategory'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="description"><value></value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>checkDigitalSignature</value></fval>
+	<fval name="start"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='JSONPathFilter'>
+							<id field='name' value='JSON Path'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="TrueFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value></value></fval>
+	<fval name="logFatal"><value>True filter error. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>True filter passed</value></fval>
+	<fval name="name"><value>True Filter</value></fval>
+	<fval name="successNode"><value contentType="reference">-1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>${kps.ApiKeyStore[bniApiKey].secret}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>key</value></fval>
+	<fval name="name"><value>Set Attribute API Secret</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Attribute API Key Enable'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>${kps.ApiKeyStore[bniApiKey].enabled}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>apikey.enable</value></fval>
+	<fval name="name"><value>Set Attribute API Key Enable</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Attribute Token'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="JSONPathFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='FalseFilter'>
+							<id field='name' value='False Filter'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="name"><value>JSON Path</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='AttributeExtractHTTPHeaderFilter'>
+							<id field='name' value='Retrieve from HTTP header x-api-key'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="JSONPath">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='JSONPathFilter'>
+						<id field='name' value='JSON Path'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="attributeName"><value>token</value></fval>
+	<fval name="expression"><value>signature</value></fval>
+	<fval name="failOnError"><value>0</value></fval>
+	<fval name="unmarshalType"><value>java.lang.String</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="JSONPath">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='JSONPathFilter'>
+						<id field='name' value='JSON Path'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="attributeName"><value>clientId</value></fval>
+	<fval name="expression"><value>clientId</value></fval>
+	<fval name="failOnError"><value>0</value></fval>
+	<fval name="unmarshalType"><value>java.lang.String</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="JSONRemoveNodeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failOnError"><value>0</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="name"><value>JSON Remove Node</value></fval>
+	<fval name="node"><value>signature</value></fval>
+	<fval name="savedDeletedNodes"><value>0</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='JavaScriptFilter'>
+							<id field='name' value='base64URL encode &amp; Hmac validation'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='FalseFilter'>
+							<id field='name' value='False Filter'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
+	<fval name="name"><value>Compare Attribute</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='TrueFilter'>
+							<id field='name' value='True Filter'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='CompareAttributeFilter'>
+						<id field='name' value='Compare Attribute'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="attrName"><value>Payloadvalidated</value></fval>
+	<fval name="expression"><value>true</value></fval>
+	<fval name="matchType"><value>IS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='CompareAttributeFilter'>
+						<id field='name' value='Compare Attribute'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="attrName"><value>Hmacvalidated</value></fval>
+	<fval name="expression"><value>true</value></fval>
+	<fval name="matchType"><value>IS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='CompareAttributeFilter'>
+						<id field='name' value='Compare Attribute'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="attrName"><value>apikey.enable</value></fval>
+	<fval name="expression"><value>true</value></fval>
+	<fval name="matchType"><value>IS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SetAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeValue"><value>${token}</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed to set the attribute value</value></fval>
+	<fval name="logFatal"><value>Error while setting the attribute value. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set the attribute value</value></fval>
+	<fval name="messageAttribute"><value>Token</value></fval>
+	<fval name="name"><value>Set Attribute Token</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='JSONRemoveNodeFilter'>
+							<id field='name' value='JSON Remove Node'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FalseFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>False filter error. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value></value></fval>
+	<fval name="name"><value>False Filter</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SLAFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="alertSystem"><value contentType="reference">
+<key type='AlertManager'><id field='name' value='Default Alert Configuration'/><key type='EmailAlertSystem'><id field='name' value='API Manager Email Alerts'/></key></key>	</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="dataAge"><value>600000</value></fval>
+	<fval name="logFailure"><value>Set SLA failed</value></fval>
+	<fval name="logFatal"><value>Set SLA aborted: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Set SLA success</value></fval>
+	<fval name="name"><value>SLA Filter</value></fval>
+	<fval name="pollRate"><value>30000</value></fval>
+	<fval name="sampleSize"><value>10000</value></fval>
+	<fval name="successNode"><value contentType="reference">-1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CommsFailureRequirement">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='SLAFilter'>
+						<id field='name' value='SLA Filter'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="breachAlertMessage"><value> Raising a Comms Failure SLA Alert. Alert details are as follows:- SLA Name: ${sla.name}. Requirement: No more than ${sla.threshold}% of requests may result in a comms failure. Percentage: ${sla.value}%. Time: ${sla.time}.</value></fval>
+	<fval name="clearAlertMessage"><value> Clearing a Comms Failure SLA Alert. Alert details are as follows:- SLA Name: ${sla.name}. Requirement: No more than ${sla.threshold}% of requests may result in a comms failure. Current Percentage: ${sla.value}%. Clearance Time: ${sla.time}.</value></fval>
+	<fval name="percentage"><value>2</value></fval>
+	<fval name="thresholdType"><value>2</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="JavaScriptFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="consumedProperties"></fval>
+	<fval name="engineName"><value>groovy</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='AlertFilter'>
+							<id field='name' value='Alert{1}'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="generatedProperties"></fval>
+	<fval name="logFailure"><value>Failed script filter</value></fval>
+	<fval name="logFatal"><value>Error while attempt to run script filter. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Passed script filter</value></fval>
+	<fval name="name"><value>base64URL encode &amp; Hmac validation</value></fval>
+	<fval name="requiredProperties"></fval>
+	<fval name="script"><value>import com.vordel.trace.Trace&#xD;&#xA;import java.util.ArrayList&#xD;&#xA;import java.lang.String&#xD;&#xA;import javax.crypto.Mac&#xD;&#xA;import javax.crypto.spec.SecretKeySpec&#xD;&#xA;import static java.nio.charset.StandardCharsets.UTF_8&#xD;&#xA;&#xD;&#xA;def invoke(msg){ &#xD;&#xA;&#x9;def jwt =msg.get(&quot;token&quot;)&#xD;&#xA;&#x9;def secretKey = msg.get(&quot;key&quot;)&#xD;&#xA;&#xD;&#xA;&#x9;// Split header, payload, signature&#xD;&#xA;&#x9;String[] token = jwt.tokenize(&quot;.&quot;)&#xD;&#xA;&#x9;msg.put(&quot;data.header&quot;,token[0])&#xD;&#xA;&#xD;&#xA;&#x9;// Check payload&#xD;&#xA;&#x9;def hashPayload = token[1]&#xD;&#xA;&#x9;def messageBody = msg.get(&quot;content.body&quot;)&#xD;&#xA;&#x9;def messageArr = messageBody.getJsonNode()&#xD;&#xA;&#x9;def message = messageArr.toString()&#xD;&#xA;&#x9;byte[] messageGetBytes = message.getBytes(UTF_8)&#xD;&#xA;&#xD;&#xA;&#x9;//Trace.info(&quot;payload : &quot;+messageArr)&#xD;&#xA;&#x9;//Trace.info(&quot;payload : &quot;+messageArr.toString())&#xD;&#xA;&#x9;def encodedMessage = messageGetBytes.encodeBase64().toString()&#xD;&#xA;&#x9;//Trace.info(&quot;hash payload : &quot;+encodedMessage)&#xD;&#xA;&#xD;&#xA;&#x9;// Base64URL filter&#xD;&#xA;&#x9;encodedMessage1 = encodedMessage.replaceAll(&apos;\\+&apos;,&apos;-&apos;)&#xD;&#xA;&#x9;encodedMessage2 = encodedMessage1.replaceAll(&apos;\\/&apos;,&apos;_&apos;)&#xD;&#xA;&#x9;encodedMessage3 = encodedMessage2.minus(&apos;==&apos;)&#xD;&#xA;&#x9;encodedMessage5 = encodedMessage3.minus(&apos;=&apos;)&#xD;&#xA;&#x9;Trace.info(&quot;hash payload : &quot;+encodedMessage3)&#xD;&#xA;&#xD;&#xA;&#x9;// Compare Payload&#xD;&#xA;&#x9;if (encodedMessage5.equals(hashPayload)){&#xD;&#xA;&#x9;&#x9;msg.put(&quot;Payloadvalidated&quot;, &quot;true&quot;)&#xD;&#xA;&#x9;&#x9;Trace.debug(&quot;Payloadvalidated is true&quot;)&#xD;&#xA;&#x9;} else {&#xD;&#xA;&#x9;&#x9;msg.put(&quot;Payloadvalidated&quot;, &quot;false&quot;)&#xD;&#xA;&#x9;&#x9;Trace.debug(&quot;Payloadvalidated is false&quot;)&#xD;&#xA;&#x9;}&#xD;&#xA;&#xD;&#xA;&#x9;//Hmac creator&#xD;&#xA;&#x9;def data = token[0]+&apos;.&apos;+token[1]&#xD;&#xA;&#x9;def hmacAlgorithm = &quot;HmacSHA256&quot;&#xD;&#xA;&#x9;Mac hmac = Mac.getInstance(hmacAlgorithm)&#xD;&#xA;   &#x9;SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), hmacAlgorithm)&#xD;&#xA;    &#x9;hmac.init(secretKeySpec)&#xD;&#xA;    &#x9;byte[] digest = hmac.doFinal(data.getBytes(UTF_8))&#xD;&#xA;&#x9;encodedData = digest.encodeBase64().toString()&#xD;&#xA;&#x9;// Base64URL filter&#xD;&#xA;&#x9;encodedData1 = encodedData.replaceAll(&apos;\\+&apos;,&apos;-&apos;)&#xD;&#xA;&#x9;encodedData2 = encodedData1.replaceAll(&apos;\\/&apos;,&apos;_&apos;)&#xD;&#xA;&#x9;encodedData3 = encodedData2.minus(&apos;==&apos;)&#xD;&#xA;&#x9;encodedData5 = encodedData3.minus(&apos;=&apos;)&#xD;&#xA;&#xD;&#xA;&#x9;//compare digital signature&#xD;&#xA;&#x9;if(encodedData5.equals(token[2])) {&#xD;&#xA;&#x9;&#x9;msg.put(&quot;Hmacvalidated&quot;,&quot;true&quot;)&#xD;&#xA;&#x9;&#x9;Trace.debug(&quot;Hmacvalidated is true&quot;)&#xD;&#xA;&#x9;} else {&#xD;&#xA;&#x9;&#x9;msg.put(&quot;Hmacvalidated&quot;,&quot;false&quot;)&#xD;&#xA;&#x9;&#x9;Trace.debug(&quot;Hmacvalidated is false&quot;)&#xD;&#xA;&#x9;}&#xD;&#xA;&#x9;return true&#xD;&#xA;}</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='CompareAttributeFilter'>
+							<id field='name' value='Compare Attribute'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AlertFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="alertMessage"><value>Alert</value></fval>
+	<fval name="alertPolicy"><value contentType="reference">-1</value></fval>
+	<fval name="alertType"><value>1</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Alert generation failed</value></fval>
+	<fval name="logFatal"><value>Alert generation aborted: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Alert generation success</value></fval>
+	<fval name="name"><value>Alert{1}</value></fval>
+	<fval name="numberMessages"><value>1</value></fval>
+	<fval name="timePeriodMillis"><value>60000</value></fval>
+	<fval name="trackPerClient"><value>1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="EmailAlertNotification">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+					<key type='AlertFilter'>
+						<id field='name' value='Alert{1}'/>
+					</key>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="alertSystem"><value contentType="reference">
+<key type='AlertManager'><id field='name' value='Default Alert Configuration'/><key type='EmailAlertSystem'><id field='name' value='API Manager Email Alerts'/></key></key>	</value></fval>
+	<fval name="customMessage"><value></value></fval>
+	<fval name="messageTemplateFile"><value></value></fval>
+	<fval name="mimeType"><value contentType="reference">-1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeExtractHTTPHeaderFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Banking Services'/>
+		<key type='CircuitContainer'>
+			<id field='name' value='Utility'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='v1'/>
+				<key type='FilterCircuit'>
+					<id field='name' value='checkDigitalSignature'/>
+				</key>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeName"><value>bniApiKey</value></fval>
+	<fval name="base64Decode"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='attribute'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="headerName"><value>x-api-key</value></fval>
+	<fval name="logFailure"><value>Failed to extract attribute HTTP header</value></fval>
+	<fval name="logFatal"><value>Error occurred while extracting attributes from HTTP header. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Extracted attribute from HTTP header</value></fval>
+	<fval name="name"><value>Retrieve from HTTP header x-api-key</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Banking Services'/>
+			<key type='CircuitContainer'>
+				<id field='name' value='Utility'/>
+				<key type='CircuitContainer'>
+					<id field='name' value='v1'/>
+					<key type='FilterCircuit'>
+						<id field='name' value='checkDigitalSignature'/>
+						<key type='SetAttributeFilter'>
+							<id field='name' value='Set Attribute API Secret'/>
+						</key>
+					</key>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="useQueryParameter"><value>0</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<fval name="name"><value>Banking Services</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ESConfiguration">
+	<fval name="name"><value>Entity Store Configuration</value></fval>
+	<fval name="passphraseTest"><value>aHR0cDsvL3d3dy52b3JkZWwuY29t</value></fval>
+	<fval name="productKey"><value>VordelGateway</value></fval>
+	<fval name="version"><value>7.7.0</value></fval>
+</entity>
+</entityStoreData>
